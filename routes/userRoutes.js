@@ -8,6 +8,7 @@ const router = express.Router();
 
 // // Rutas Protegidas de Usuario
 router.post('/', authenticateToken, authorizeRole('Super Admin'), validateUserCreation, userController.createUser);
+router.get('/search/:term', authenticateToken, userController.getAllUserBySearch);
 router.get('/', authenticateToken, userController.getAllUsers);
 router.get('/:id', authenticateToken, userController.getUserById);
 router.put('/:id', authenticateToken, authorizeRole('Super Admin'), validateUserUpdate, userController.updateUser);

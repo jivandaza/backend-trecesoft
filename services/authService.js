@@ -55,7 +55,7 @@ const verifyPassword = async (password, hashedPassword) => {
     return await bcrypt.compare(password, hashedPassword);
 };
 
-const newPassword = async (id, password) => {
+const resetPassword = async (id, password) => {
     const user = await User.findById(id);
     user.password = password;
     await user.save();
@@ -66,5 +66,5 @@ export default {
     getUserByEmail,
     registerUser,
     verifyPassword,
-    newPassword
+    resetPassword
 };

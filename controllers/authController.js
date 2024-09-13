@@ -7,7 +7,7 @@ import authService from "../services/authService.js";
 export const registerUser = async (req, res) => {
     try {
         const user = await authService.registerUser(req.body);
-        res.status(201).json({ message: 'Registered successfully...', user });
+        res.status(201).json({ message: 'Registered successfully', user });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -20,20 +20,24 @@ export const loginUser = async (req, res) => {
     try {
         const user = await authService.getUserByUsername(username);
 
-        if (!user) {
+        if ( !user ) {
             return res.status(400).json({ error: 'Invalid credentials' });
+        }
+
+        if ( !user.password ) {
+            return res.status(400).json({ error: 'You need to recover your password' });
         }
 
         // Verificar la contraseña
         const isMatch = await authService.verifyPassword(password, user.password);
-        if (!isMatch) {
+        if ( !isMatch ) {
             return res.status(400).json({ error: 'Invalid credentials' });
         }
 
         // Generar un token JWT
         const token = generateToken(user);
 
-        res.status(200).json({ message: 'Logging in...', token });
+        res.status(200).json({ message: 'Logging in', token });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -46,30 +50,30 @@ export const forgotPassword = async (req, res) => {
     try {
         const user = await authService.getUserByEmail(email);
         if (!user) {
-            return res.status(400).json({ error: 'User not found' });
+            return res.status(400).json({ message: 'User not found' });
         }
 
         // Generar un token de recuperación
-        const resetToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
 
         // Enviar correo electrónico con el token de recuperación
-        await sendResetPasswordEmail(user.email, resetToken);
+        await sendResetPasswordEmail(user.email, token);
 
         res.status(200).json({ message: 'Recovery email sent' });
     } catch (error) {
-        console.log(error)
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: 'Error forgot password', error: error.message });
     }
 };
 
 // Función para establecer una nueva contraseña
-export const newPassword = async (req, res) => {
+export const resetPassword = async (req, res) => {
     const { password } = req.body;
 
     try {
-        await authService.newPassword(req.params.id, password);
-        res.status(200).json({ message: 'Password updated'});
+        await authService.resetPassword(req.params.id, password);
+        res.status(200).json({ message: 'Password save'});
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error(error)
+        res.status(500).json({ message: 'Error reset password', error: error.message });
     }
 };

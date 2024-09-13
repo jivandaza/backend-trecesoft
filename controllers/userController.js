@@ -1,10 +1,23 @@
 // controllers/userController.js
 
 import userService from '../services/userService.js';
+import User from "../models/userModel.js";
 
 // Función para crear un nuevo usuario
 const createUser = async (req, res) => {
     try {
+        const existingUser = await User.findOne({
+            $or: [
+                { email: req.body.email },
+                { username: req.body.username }
+            ]
+        });
+
+        // Verificar si el usuario ya existe por email o username
+        if (existingUser) {
+            res.status(400).json({message: 'User already exists'});
+        }
+
         const user = await userService.createUser(req.body);
         res.status(201).json(user);
     } catch (error) {
@@ -33,6 +46,15 @@ const getUserById = async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ message: 'Error getting user', error: error.message });
+    }
+};
+
+const getAllUserBySearch = async (req, res) => {
+    try {
+        const users = await userService.getAllUserBySearch(req?.params?.term);
+        res.status(201).json(users);
+    }  catch (error) {
+        res.status(500).json({ message: 'Error search user', error: error.message });
     }
 };
 
@@ -68,6 +90,7 @@ export default {
     createUser,
     getAllUsers,
     getUserById,
+    getAllUserBySearch,
     updateUser,
     deleteUser
 };

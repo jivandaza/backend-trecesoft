@@ -1,19 +1,26 @@
 import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // Función para crear un transportador de correo electrónico
 const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
+    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
+    },
+    tls: {
+        rejectUnauthorized: false
     }
 });
 
 // Función para enviar un correo electrónico de restablecimiento de contraseña
 export const sendResetPasswordEmail = async (to, resetToken) => {
-    const resetURL = `${process.env.CLIENT_URL}/forgot-password?token=${resetToken}`;
+    const resetURL = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
 
     const mailOptions = {
         from: process.env.EMAIL_USER,

@@ -1,22 +1,9 @@
 import User from '../models/userModel.js';
 import Role from '../models/roleModel.js';
-import bcrypt from 'bcryptjs';
 
 // Función para crear un nuevo usuario
 const createUser = async (userData) => {
     const { username, password, email, name, role } = userData;
-
-    const existingUser = await User.findOne({
-        $or: [
-            { email: userData.email },
-            { username: userData.username }
-        ]
-    });
-
-    // Verificar si el usuario ya existe por email o username
-    if (existingUser) {
-        throw new Error('User already exists');
-    }
 
     // Crear el nuevo usuario
     const user = new User({
@@ -24,7 +11,6 @@ const createUser = async (userData) => {
         password,
         email,
         name,
-        status: true,
         role
     });
 
@@ -41,14 +27,28 @@ const getUserById = async (id) => {
     return await User.findById(id).select('-password').populate('role');
 };
 
+// Función para obtener todos los usuarios de una búsqueda
+const getAllUserBySearch = async (search) => {
+    const regex = new RegExp(search, 'i');
+
+    const roleId = await Role.find({
+        '$or' : [
+            { description: regex }
+        ]
+    });
+
+    return await User.find({
+        '$or' : [
+            { username: regex },
+            { email: regex },
+            { name: regex },
+            { role: roleId }
+        ]
+    }).select('-password').populate('role');
+};
+
 // Función para actualizar un usuario por ID
 const updateUser = async (id, userData) => {
-    // Verificar si el usuario existe
-    const user = await User.findById(id);
-    if (!user) {
-        throw new Error('User not found');
-    }
-
     delete userData.password;
 
     return await User.findByIdAndUpdate(id, userData, { new: true });
@@ -63,6 +63,7 @@ export default {
     createUser,
     getAllUsers,
     getUserById,
+    getAllUserBySearch,
     updateUser,
     deleteUser
 };

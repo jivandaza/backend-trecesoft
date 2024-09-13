@@ -4,14 +4,13 @@ import { body, validationResult } from 'express-validator';
 export const validateUserCreation = [
     body('username').isString().notEmpty().withMessage('Username is required'),
     body('email').isEmail().withMessage('Invalid email'),
-    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
     body('name').isString().notEmpty().withMessage('Name is required'),
     body('role').isString().notEmpty().withMessage('Role is required'),
 
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ error: errors.array()[0].msg });
+            return res.status(400).json({ message: errors.array()[0].msg });
         }
         next();
     }
@@ -27,7 +26,7 @@ export const validateUserUpdate = [
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ error: errors.array()[0].msg });
+            return res.status(400).json({ message: errors.array()[0].msg });
         }
         next();
     }
@@ -70,19 +69,19 @@ export const validateUserForgotPassword = [
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ error: errors.array()[0].msg });
+            return res.status(400).json({ message: errors.array()[0].msg });
         }
         next();
     }
 ];
 
-export const validateUserNewPassword = [
+export const validateUserResetPassword = [
     body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
 
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ error: errors.array()[0].msg });
+            return res.status(400).json({ message: errors.array()[0].msg });
         }
         next();
     }
